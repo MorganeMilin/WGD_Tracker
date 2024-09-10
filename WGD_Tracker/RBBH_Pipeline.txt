@@ -1,0 +1,82 @@
+#! /bin/bash
+#SBATCH --job-name=WGD_Tracker-RBBH
+
+. /local/env/envparallel-20190122.sh
+. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
+
+source $1
+
+echo "Start of the RBBH Pipeline on: $data_dir"; date; pwd
+echo "Nb coeur = $Nb_CPU"
+if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
+TMP_name="TMP_${data_dir##*/}"
+
+
+echo -e "\n############################" 
+echo -e "\n Step 1 - Param Filtration " 
+echo -e "\n############################\n"
+
+if [ -d "${data_dir}/RBBH" ]; then rm ${data_dir}/RBBH/*; else mkdir ${data_dir}/RBBH; fi
+ls -R ${data_dir}/*.blast | cat > $TMP_name
+while IFS= read -r line; do
+	echo "python ${tool_dir}/Script/RBBH_Filtration.py blast_file=$line identity=$identity len_align=$len_align len_ratio=$len_ratio intragenomic=$intragenomic corr_intra="\"$corr_intra\""" >> ${data_dir}/launch_pFlt.sh ;
+done < $TMP_name
+parallel -a ${data_dir}/launch_pFlt.sh -j $Nb_CPU
+
+if [ $coding == "True" ]; then
+	echo -e "\n\t#########"
+	echo -e "\n\t Coding "
+	echo -e "\n\t#########\n"
+	ls -R ${data_dir}/RBBH/pFlt*.txt | cat > $TMP_name
+	while IFS= read -r line; do 
+		echo "python ${tool_dir}/Script/RBBH_Coding.py data_file=$line coding_type=$coding_type SP1_infos="\"$SP1_coding_infos\"" SP2_infos="\"$SP2_coding_infos\"" intragenomic=$intragenomic" >> ${data_dir}/launch_annot.sh ;
+	done < $TMP_name
+fi 
+if [ $coding == "True" ]; then parallel -a ${data_dir}/launch_annot.sh -j $Nb_CPU; else :; fi 
+
+if [ $TErm == "True" ]; then
+	echo -e "\n\t############" 
+	echo -e "\n\t Repeat_rm " 
+	echo -e "\n\t############\n" 
+	if [ $coding == "True" ]; then 
+		ls -R ${data_dir}/RBBH/cds*.txt | cat > $TMP_name
+	else
+		ls -R ${data_dir}/RBBH/pFlt*.txt | cat > $TMP_name
+	fi
+	while IFS= read -r line; do 
+		echo "python ${tool_dir}/Script/RBBH_TErm.py data_file=$line TErm_type=$TErm_type intragenomic=$intragenomic SP1_infos="\"$SP1_TErm\"" SP2_infos="\"$SP2_TErm\""" >> ${data_dir}/launch_Repeat.sh ;
+	done < $TMP_name
+fi
+if [ $TErm == "True" ]; then parallel -a ${data_dir}/launch_Repeat.sh -j $Nb_CPU; else :; fi
+echo -e "\nStep 1 - Filtration Done\n"
+
+
+echo -e "\n#####################" 
+echo -e "\n Step 2 - Best Hits " 
+echo -e "\n#####################\n" 
+
+if [ $TErm == "True" ]; then 
+	ls -R ${data_dir}/RBBH/TErm*.txt | cat > $TMP_name
+elif [ $coding == "True" ]; then 
+	ls -R ${data_dir}/RBBH/cds*.txt | cat > $TMP_name
+else
+	ls -R ${data_dir}/RBBH/pFlt*.txt | cat > $TMP_name
+fi
+while IFS= read -r line; do 
+	echo "python ${tool_dir}/Script/RBBH_BH.py data_file=$line limit=$BH_limit interval=$interval intragenomic=$intragenomic" >> ${data_dir}/launch_BH.sh ;
+done < $TMP_name 
+parallel -a ${data_dir}/launch_BH.sh -j 2
+echo -e "\nStep 2 - BH Done\n"
+
+
+echo -e "\n######################################" 
+echo -e "\n Step 3 - Reciprocal Best Blast Hits " 
+echo -e "\n######################################\n" 
+
+out_name="$([[ $TErm == 'True' ]] && echo 'TErm_')$([[ $coding == 'True' ]] && echo 'cds_')pFlt_"
+python ${tool_dir}/Script/RBBH_RBBH.py folder_name=$data_dir SP1=$SP1 SP2=$SP2 file_name=$out_name
+echo -e "\nStep 3 - RBBH Done\n"
+
+if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
+
+deactivate
