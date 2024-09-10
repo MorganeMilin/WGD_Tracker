@@ -26,6 +26,6 @@ WGD_Tracker does not require any installation, a simple git clone is enough, but
 
 ### Usage
 
-	conda env create -f /your_path_to/LTR_retriever/LTR_retriever.yml
+	bash --cpus-per-task=2 "{PATH}"/WGD_Tracker/RBBH_Pipeline.txt "{PATH}"/file.config
 
 ### Citations
