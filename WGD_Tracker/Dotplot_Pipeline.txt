@@ -1,0 +1,15 @@
+#! /bin/bash
+#SBATCH --job-name=WGD_Tracker-Dotplot
+
+. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
+
+source $1
+
+echo "Start of the Dotplot representation Pipeline on: $data_dir"; date; pwd
+
+if [ -d "${data_dir}/Dotplot" ]; then :; else mkdir ${data_dir}/Dotplot; fi
+python ${tool_dir}/Script/Dotplot_formatting.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 name_corr="\"$dotplot_name_corr\"" Intragenomic=$intragenomic control_file=$control_file dataset=$dotplot_data gff1_motif=$sp1_motif gff2_motif=$sp2_motif
+python ${tool_dir}/Script/Dotplot_generator.py dir_path=$data_dir control_file=$control_file outname=$out
+echo -e "\nDot plot Done\n"
+
+deactivate

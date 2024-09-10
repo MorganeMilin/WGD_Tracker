@@ -1,0 +1,157 @@
+---
+title: Running mixture models from Ks files
+author: Morgane MILIN in collaboration with Parisod's lab
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+geometry: margin=1.5cm
+output: pdf_document
+---
+\rule{1\linewidth}{0.5pt}
+
+# \textcolor{blue}{Documentation}
+<http://exploringdatablog.blogspot.ch/2011/08/fitting-mixture-distributions-with-r.html>  
+<http://cran.r-project.org/web/packages/mixtools/vignettes/mixtools.pdf>  
+\rule{1\linewidth}{0.5pt}
+
+# \textcolor{blue}{Library}
+```{r, echo=F}
+library(gridExtra)
+library(grid)
+library(mixtools)
+```
+\rule{1\linewidth}{0.5pt}
+
+# \textcolor{blue}{Parameters}
+**ksmin** and **ksmax:** minimum and maximum ks value kept for the analysis  
+**kmin** and **kmax:** min and max number of peaks being expected. **WARNING**: analysis time increases with k  
+**boots:** bootstrapping effort during search for optimal number of peaks. **WARNING**: this is time consuming. Advised value is 1000  
+**epsilon:** convergence criterion; heuristics are stopped when loglik is improved by less than epsilon  
+**breaks:** number of breaks on the histogram  
+
+```{r, echo=F}
+for(arg in commandArgs()){
+	tmp= unlist(strsplit(arg,split="="))
+	opt = tmp[1];val = tmp[2]
+	if(opt=='data_file'){infile=val}
+	if(opt=='ksmin'){ksmin=as.numeric(val)}
+	if(opt=='ksmax'){ksmax=as.numeric(val)}
+	if(opt=='kmin'){kmin=as.numeric(val)}
+	if(opt=='kmax'){kmax=as.numeric(val)}
+	if(opt=='boots'){boots=as.numeric(val)}
+	if(opt=='epsilon'){epsilon=as.numeric(val)}
+	if(opt=='breaks'){breaks=as.numeric(val)}
+}
+bsn <- gsub("\\..*$", "", basename(infile))
+cat("infile:", {infile}, "\n")
+
+cat("ksmin:", {ksmin}, "; ksmax: ", {ksmax}, "\n")
+cat("kmin:", {kmin}, "; kmax:", {kmax}, "\n")
+cat("boots:", {boots}, "\n")
+cat("epsilon:", {epsilon}, "\n")
+cat("breaks:", {breaks}, "\n")
+```
+\rule{1\linewidth}{0.5pt}
+
+# \textcolor{blue}{Functions}
+```{r, echo=F}
+plot.mixEM = function (x, whichplots = 1, loglik = 1 %in% whichplots, density = 2 %in% 
+    whichplots, xlab1 = "Iteration", ylab1 = "Log-Likelihood", 
+    main1 = "Observed Data Log-Likelihood", col1 = 1, lwd1 = 2, 
+    xlab2 = NULL, ylab2 = NULL, main2 = NULL, col2 = NULL, lwd2 = 2, 
+    alpha = 0.05, marginal = FALSE, ...){
+    def.par <- par(ask = (loglik + density > 1), "mar")
+    mix.object <- x
+    if (!inherits(mix.object, "mixEM")) 
+        stop("Use only with \"mixEM\" objects!")
+    if (loglik) {
+        plot(mix.object$all.loglik, xlab = xlab1, ylab = ylab1, 
+            main = main1, type = "l", lwd = lwd1, col = col1, 
+            ...)
+    }
+    if (density) {
+        if (mix.object$ft == "normalmixEM") {
+            k <- ncol(mix.object$posterior)
+            x <- sort(mix.object$x)
+            a <- hist(x, plot = FALSE, breaks = breaks)
+            maxy <- max(max(a$density), 0.3989 * mix.object$lambda/mix.object$sigma)
+            if (is.null(xlab2)) {
+                xlab2 <- "Data"
+            }
+            if (is.null(col2)) {
+                col2 <- 2:(k + 1)
+            }
+            
+            ### If willing to show counts instead of densities (uncomment to use)
+            a = hist(x, freq = FALSE, main = main2, xlab = xlab2, 
+                ylim = c(0, maxy), ylab = ylab2, axes = F, col = "light grey", ...)
+                
+            ratio = max(a$density) / max(a$counts)
+            labs = pretty(c(0, maxy / ratio), 8)
+            labs = labs[-length(labs)]
+            ats = labs * ratio
+            axis(side = 1, at = round(seq(0, max(x), length.out = 5), 2))
+            axis(side = 2, at = ats, label = labs)
+            
+            ###
+            
+            if (length(mix.object$mu) == 1) {
+                arbvar <- TRUE
+                mix.object$sigma <- mix.object$scale * mix.object$sigma
+                arbmean <- FALSE
+            }
+            if (length(mix.object$mu) == k && length(mix.object$sigma) == 
+                1) {
+                arbmean <- TRUE
+                arbvar <- FALSE
+            }
+            if (length(mix.object$sigma) == k && length(mix.object$mu) == 
+                k) {
+                arbmean <- TRUE
+                arbvar <- TRUE
+            }
+            for (i in 1:k) {
+                lines(x, mix.object$lambda[i] * dnorm(x, mean = mix.object$mu[i * 
+                  arbmean + (1 - arbmean)], sd = mix.object$sigma[i * 
+                  arbvar + (1 - arbvar)]), col = col2[i], lwd = lwd2)
+            }
+        }
+    }
+    par(def.par)
+}
+cat("Done\n")
+```
+\rule{1\linewidth}{0.5pt}
+
+
+# \textcolor{blue}{Import dataset}
+### \textcolor{red}{Dataset:}
+```{r, echo=F}
+data <- read.table(infile)
+summary(data)
+```
+
+### \textcolor{red}{Filtered dataset:}
+```{r, echo=F}
+data2 <- data.frame(No = 1:nrow(data), Node.Ks = as.numeric(data$V4)) 	# Retrieve Ks value
+data2 <- data2[!is.na(data2$Node.Ks), ]						# Remove missing Ks value
+data2 <- data2[data2$Node.Ks >= ksmin & data2$Node.Ks < ksmax, ] 	# focus on a range 
+summary(data2)
+```
+\rule{1\linewidth}{0.5pt}
+
+\newpage
+# \textcolor{blue}{Estimate parameters (mixture of normal distributions)}
+## \textcolor{red}{No transformation}
+```{r, echo=F, fig.width=7, fig.height=7}
+for (i in kmin:kmax){
+	cat("Number of components:", {i}, "\n")
+	
+	mix.object = normalmixEM(data2$Node.Ks, lambda = NULL, mu = NULL, sigma = NULL, k = i, epsilon = epsilon)
+	centers = round(mix.object$mu, 3); stdevs = round(mix.object$sigma, 3); contribs = round(mix.object$lambda, 3); loglik = mix.object$loglik
+	params = data.frame(i, centers, stdevs, contribs, loglik)
+	grid.arrange(tableGrob(params, theme=ttheme_minimal()))
+
+	graph.params = hist(mix.object$x, breaks = breaks, plot = F)
+	plot.mixEM(mix.object, which = 2, breaks = breaks, xlab2 = "Ks values", ylab2 = "Number of duplicates")
+}
+```
+

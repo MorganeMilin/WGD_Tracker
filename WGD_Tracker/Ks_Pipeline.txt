@@ -1,0 +1,242 @@
+#! /bin/bash
+#SBATCH --job-name=WGD_Tracker-Ks
+
+. /local/env/envjava-1.8.0.sh
+. /local/env/envpaml-4.9.sh
+. /local/env/envparallel-20190122.sh
+. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
+macse_path="/home/genouest/cnrs_umr6553/mmilin/MACSE_V2_PIPELINES/UTILS/macse_v2.05.jar"
+
+source $1
+
+echo "Start of the Ks Pipeline on: $data_dir"; date; pwd
+Nb_CPU=${Nb_CPU:-2}
+echo "Nb coeur = $Nb_CPU"
+if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
+TMP_name="TMP_${data_dir##*/}"
+
+######################################################
+# Default value if not defined in configuration file #
+######################################################
+
+Ks_begin=${Ks_begin:-"fasta_Extract"}
+Ks_folder_limit=${Ks_folder_limit:-"10000"}
+Ks_file_limit=${Ks_file_limit:-"2000"}
+mxt_ksmin=${mxt_ksmin:-"0.01"}
+mxt_ksmax=${mxt_ksmax:-"3"}
+mxt_kmin=${mxt_kmin:-"2"}
+mxt_kmax=${mxt_kmax:-"6"}
+mxt_boots=${mxt_boots:-"1000"}
+mxt_epsilon=${mxt_epsilon:-"1e-3"}
+mxt_breaks=${mxt_breaks:-"300"}
+
+
+####################
+# fasta extraction #
+####################
+
+fasta_Extract() {
+	echo "Start fasta extraction"
+	if [ -d "${data_dir}/Ks" ]; then :; else mkdir ${data_dir}/Ks; fi
+	if [ -d "${data_dir}/Ks/fasta" ]; then :; else mkdir ${data_dir}/Ks/fasta; fi
+	ls -R ${data_dir}/RBBH/RBBH*.txt | cat > $TMP_name
+	while IFS= read -r line; do 
+		python ${tool_dir}/Script/Ks_FastaExtract.py data_file=$line intragenomic=$intragenomic
+	done < $TMP_name
+	
+	##############################################
+	# Distribution of files in different folders #
+	##############################################
+	cd ${data_dir}/Ks/
+	folder="./fasta/"
+	folder_limit=$Ks_folder_limit
+	file_limit=$Ks_file_limit
+	tar -czf ./fasta.tar.gz ./fasta/
+	if [ $(ls -A $folder | wc -l) != "0" ]; then
+		echo "initial fasta folder isn't empty"
+		for ((i = 1; i < ${folder_limit}+1; i++)); do
+			if [ $(ls -A $folder | wc -l) != "0" ]; then
+				TMP_folder=./fasta_${i}/
+				if [ -d "$TMP_folder" ]; then :; else mkdir ./$TMP_folder/; fi
+				echo "folder ==> fasta_${i}"
+				cd ./fasta/
+				for x in `ls`; do
+					mv ${x} ../${TMP_folder}
+					if [[ $(ls -A ../$TMP_folder | wc -l) -ge $file_limit ]]; then
+						echo "$(ls -A ../$TMP_folder | wc -l) is greater or equal than ${file_limit}"
+						break
+					fi
+				done
+				cd ..
+			else
+				echo "empty initial fasta folder"
+				break
+			fi
+		done
+	fi
+	rm -R ${folder}
+	rm $TMP_name
+}
+
+
+##################
+# Ks calculation #
+##################
+
+Ks_calculation() {
+	. /local/env/envjava-1.8.0.sh
+	. /local/env/envpaml-4.9.sh
+	. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
+	macse_path="/home/genouest/cnrs_umr6553/mmilin/MACSE_V2_PIPELINES/UTILS/macse_v2.05.jar"
+
+	echo "Start Ks calculation"
+	local data_dir=$1
+	local tool_dir=$2
+	local targeted_folder=$3
+	echo "data_dir = $data_dir"
+	echo "tool_dir = $tool_dir"
+	echo "targeted_folder= $targeted_folder"
+	
+	cd ${data_dir}/Ks/
+	
+	local fasta_folder=$(basename "$targeted_folder")
+	fasta_folder=${fasta_folder%/}
+	local Ks_folder="Ks_calculation_${fasta_folder}"
+	local TMP_name="TMP_${fasta_folder}"
+	echo "fasta_folder = ${fasta_folder}"
+	echo "Ks_folder = ${Ks_folder}"
+	echo "TMP_name = ${TMP_name}"
+	
+	if [ -d "${data_dir}/Ks/${Ks_folder}" ]; then :; else mkdir ${data_dir}/Ks/${Ks_folder}; fi
+	ls -R ${data_dir}/Ks/${fasta_folder}/* | cat > ${data_dir}/Ks/$TMP_name
+	while IFS= read -r line; do
+		pwd
+		echo "line = $line"
+		line_corr="./${fasta_folder}/${line##*/}"
+		echo "line_corr = $line_corr"
+		folder_name=${line_corr%.fa*}
+		folder_name=${folder_name##*/}
+		echo "folder_name = $folder_name"
+		
+		###################
+		# Folder Creation #
+		###################
+		if [ -d "${data_dir}/Ks/${Ks_folder}/${folder_name}" ]; then :; else mkdir ${data_dir}/Ks/${Ks_folder}/${folder_name}; fi
+		
+		#########################################
+		# Copy the fasta file to the new folder #
+		#########################################
+		cp ${line_corr} ${data_dir}/Ks/${Ks_folder}/${folder_name}/
+		
+		##############################
+		# MACSE - Sequence Alignment #
+		##############################
+		file_name=${line%.fa*}
+		file_name=${file_name##*/}
+		file_AA="${data_dir}/Ks/${Ks_folder}/${folder_name}/${file_name}_AA.fasta"
+		file_NT="${data_dir}/Ks/${Ks_folder}/${folder_name}/${file_name}_NT.fasta"
+		echo "$file_AA"
+		echo "$file_NT"
+		java -jar $macse_path -prog alignSequences -out_AA $file_AA -out_NT $file_NT -seq $line
+		
+		###################
+		# Codon alignment #
+		###################
+		python ${tool_dir}/Script/Codon_alignment.py NT_file=$file_NT AA_file=$file_AA
+		file_NT_codon="./Codon_alignment_NT.fasta"
+		echo "$file_NT_codon"
+		
+		###############################
+		# PAML - codeml - Preparation #
+		###############################
+		cp ${tool_dir}/control_file.txt ${data_dir}/Ks/${Ks_folder}/${folder_name}/
+		cd ${data_dir}/Ks/${Ks_folder}/${folder_name}/
+		sed -i "1i seqfile = ${file_NT_codon}" ./control_file.txt
+		sed -i "2i outfile = ./res.codeml.txt" ./control_file.txt
+		codeml ./control_file.txt
+		cd ../..
+		echo "Done"
+		echo ""
+	done < $TMP_name
+	
+	##########################
+	# Retrieval of Ks values #
+	##########################
+	cd ${data_dir}/Ks/
+	python ${tool_dir}/Script/Ks_Compilation.py Res_compil_NG_${Ks_folder}.txt ./${Ks_folder}/*/
+	tar -czf ./${Ks_folder}.tar.gz ./${Ks_folder}/
+	rm -R ${Ks_folder}
+	rm -R ${fasta_folder}
+	rm $TMP_name
+}
+
+
+############################
+# Compilation of Ks values #
+############################
+
+Ks_compilation() {
+	echo "Start Ks compilation"
+	cd ${data_dir}/Ks/
+	cat ./Res_compil_NG_Ks_calculation_fasta_* > ./Res_compil_NG_Ks_total.txt
+	wc -l ./Res_compil_NG_Ks_total.txt
+	rm ./Res_compil_NG_Ks_calculation_fasta_*
+	
+	tar -czf ./Ks_calculation_fasta.tar.gz ./Ks_calculation_fasta_*
+	rm -R ./Ks_calculation_fasta_*
+}
+
+
+#####################################################
+# Compute mixture model - Determine number of peaks #
+#####################################################
+
+
+Ks_distribution() {
+	echo "Start Ks distribution representation using the R package mixtools"
+	# . /local/env/envsingularity-3.8.5.sh 
+	cd ${data_dir}/Ks/
+	out_path=$PWD
+	echo "out path: ${out_path}"
+	mixtools_path=${tool_dir}
+	echo "mixtools path: ${mixtools_path}"
+	Ks_dataset=${out_path}/Res_compil_NG_Ks_total.txt
+	echo "Ks_dataset = $Ks_dataset"
+	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib.Rmd', output_file='${out_path}/Ks_distribution_NG.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib_log_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_log_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib_sqrt_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_sqrt_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+}
+
+
+#############################################
+# Control logic to determine where to start #
+#############################################
+case $Ks_begin in
+	"fasta_Extract")
+		fasta_Extract
+		cd ${data_dir}/Ks/
+		export -f Ks_calculation
+		ls -d ./fasta_*/ | sed "s|^|Ks_calculation \"$data_dir\" \"$tool_dir\" \"|; s|/$|\"|" > TMP_fasta
+		parallel -a TMP_fasta -j $Nb_CPU
+		Ks_compilation
+		Ks_distribution
+		;;
+	"Ks_calculation")
+		cd ${data_dir}/Ks/
+		export -f Ks_calculation
+		ls -d ./fasta_*/ | sed "s|^|Ks_calculation \"$data_dir\" \"$tool_dir\" \"|; s|/$|\"|" > TMP_fasta
+		parallel -a ./TMP_fasta -j $Nb_CPU
+		Ks_compilation
+		Ks_distribution
+		;;
+	"Ks_distribution")
+		Ks_distribution
+		;;
+	*)
+		echo "Valeur de Ks_begin non reconnue: $Ks_begin"
+		echo "Veuillez utiliser 'fasta_Extract', 'Ks_calculation' ou 'Ks_distribution'"
+		exit 1
+		;;
+esac
+
+deactivate
