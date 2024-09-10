@@ -21,20 +21,11 @@ WGD_Tracker does not require any installation, a simple git clone is enough, but
 - Dotplot_Pipeline: Python3
 
 ### Inputs
-  * RBBH_Pipeline
-Blast output file 
-
-  * Ks_Pipeline
-the output file from the RBBH_Pipeline analysis 
-
-  #### Synteny_Pipeline
-the output files from the RBBH_Pipeline and Ks_Pipeline analysis
-
-  #### Dotplot_Pipeline
-Any outfile from RBBH, Ks or Synteny Pipelines + another configuration file for the axes
 
 ### Outputs
 
 ### Usage
+
+	conda env create -f /your_path_to/LTR_retriever/LTR_retriever.yml
 
 ### Citations
