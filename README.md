@@ -27,5 +27,8 @@ WGD_Tracker does not require any installation, a simple git clone is enough, but
 ### Usage
 
 	bash --cpus-per-task=2 "{PATH}"/WGD_Tracker/RBBH_Pipeline.txt "{PATH}"/file.config
+ 	bash --cpus-per-task=2 "{PATH}"/WGD_Tracker/Ks_Pipeline.txt "{PATH}"/file.config
+  	bash "{PATH}"/WGD_Tracker/Synteny_Pipeline.txt "{PATH}"/file.config
+   	bash "{PATH}"/WGD_Tracker/Dotplot_Pipeline.txt "{PATH}"/file.config
 
 ### Citations
