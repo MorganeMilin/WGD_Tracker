@@ -12,3 +12,8 @@ WGD_Tracker does not require any installation, a simple git clone is enough, but
 - [RBBH_Pipeline](#RBBH_Pipeline)
 - [RBBH_Pipeline]
 - (#RBBH_Pipeline)
+""Required dependencies:""
+- RBBH_Pipeline: Python3 and Parallel
+- Ks_Pipeline: Python3, Java, PAML, MACSE, R, Singularity and Parallel
+- Synteny_Pipeline: Python3
+- Dotplot_Pipeline: Python3
