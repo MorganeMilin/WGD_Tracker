@@ -77,7 +77,7 @@ for line in input_file:
 
         if sp1 in dict_coding:
             if line[0] in dict_coding[sp1]:
-                status, non_coding = fct.coding_check(species=sp1, col=0, col_start=6, col_end=7, limit=sp1_limit)
+                status, non_coding = fct.coding_check(species=sp1, col=line[0], col_start=line[6], col_end=line[7], limit=sp1_limit, dico=dict_coding)
                 if not status:
                     continue
 
@@ -86,7 +86,7 @@ for line in input_file:
         ################
         if intragenomic:
             if line[1] in dict_coding[sp1]:
-                status, non_coding = fct.coding_check(species=sp1, col=1, col_start=8, col_end=9, limit=sp1_limit)
+                status, non_coding = fct.coding_check(species=sp1, col=line[1], col_start=line[8], col_end=line[9], limit=sp1_limit, dico=dict_coding)
 
         ################
         # Intergenomic #
@@ -94,7 +94,7 @@ for line in input_file:
         else:
             if sp2 in dict_coding:
                 if line[1] in dict_coding[sp2]:
-                    status, non_coding = fct.coding_check(species=sp2, col=1, col_start=8, col_end=9, limit=sp2_limit)
+                    status, non_coding = fct.coding_check(species=sp2, col=line[1], col_start=line[8], col_end=line[9], limit=sp2_limit, dico=dict_coding)
 
     #########################
     # Intergenomic - simple #
@@ -109,7 +109,7 @@ for line in input_file:
 
         if sp_simple in dict_coding:
             if line[sp_col] in dict_coding[sp_simple]:
-                status, non_coding = fct.coding_check(species=sp_simple, col=sp_col, col_start=start, col_end=end, limit=sp_limit)
+                status, non_coding = fct.coding_check(species=sp_simple, col=line[sp_col], col_start=line[start], col_end=line[end], limit=sp_limit, dico=dict_coding)
 
     ###########
     # Outfile #

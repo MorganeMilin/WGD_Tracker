@@ -62,20 +62,20 @@ def dico_coding_generator(gff, dico_coding, ft_type, species):
     return dico_coding
 
 
-def coding_check(species, col, col_start, col_end, limit):
+def coding_check(species, col, col_start, col_end, limit, dico):
     overlap, non_coding = None, False
-    for pos in dict_coding[species][line[col]]:
+    for pos in dico[species][col]:
         # Si blast alignment est inclu completement dans un coding region
-        if int(pos[0]) <= int(line[col_start]) < int(line[col_end]) <= int(pos[1]):
+        if int(pos[0]) <= int(col_start) < int(col_end) <= int(pos[1]):
             overlap = True
             break
         # Si coding region completement inclu dans blast
-        elif int(line[col_start]) <= int(pos[0]) < int(pos[1]) <= int(line[col_end]):
+        elif int(col_start) <= int(pos[0]) < int(pos[1]) <= int(col_end):
             overlap = True
             break
         # Si blast alignment et coding region sont chevauchant:
-        elif int(pos[0]) <= int(line[col_start]) < int(pos[1]) or int(pos[0]) < int(line[col_end]) <= int(pos[1]):
-            if int(pos[1]) - int(line[col_start]) >= limit and int(line[col_end]) - int(pos[0]) >= limit:
+        elif int(pos[0]) <= int(col_start) < int(pos[1]) or int(pos[0]) < int(col_end) <= int(pos[1]):
+            if int(pos[1]) - int(col_start) >= limit and int(col_end) - int(pos[0]) >= limit:
                 overlap = True
                 break
             else:
