@@ -19,6 +19,7 @@ This tool comprises four pipelines:
 
 ### Installation 
 WGD_Tracker does not require any installation, a simple git clone is enough:
+
 	git clone https://github.com/MorganeMilin/WGD_Tracker.git 
 
 However, WGD_Tracker does **require dependencies**:
