@@ -45,4 +45,4 @@ Please consult the Manual.pdf for instructions on how to format your working dir
    	bash "{PATH}"/WGD_Tracker/Dotplot_Pipeline.txt "{PATH}"/file.config
 
 ### Citations
-Milin M. GitHub - MorganeMilin/WGD_Tracker : Tool to perform genomic comparison, identify and date whole genome duplication. GitHub. https://github.com/MorganeMilin/WGD_Tracker
+
