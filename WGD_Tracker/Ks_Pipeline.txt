@@ -25,7 +25,7 @@ Ks_file_limit=${Ks_file_limit:-"2000"}
 mxt_ksmin=${mxt_ksmin:-"0.01"}
 mxt_ksmax=${mxt_ksmax:-"3"}
 mxt_kmin=${mxt_kmin:-"2"}
-mxt_kmax=${mxt_kmax:-"6"}
+mxt_kmax=${mxt_kmax:-"4"}
 mxt_boots=${mxt_boots:-"1000"}
 mxt_epsilon=${mxt_epsilon:-"1e-3"}
 mxt_breaks=${mxt_breaks:-"300"}
@@ -87,7 +87,7 @@ Ks_calculation() {
 	. /local/env/envjava-1.8.0.sh
 	. /local/env/envpaml-4.9.sh
 	. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-	macse_path="/home/genouest/cnrs_umr6553/mmilin/MACSE_V2_PIPELINES/UTILS/macse_v2.05.jar"
+	macse_path=${macse_path}
 
 	echo "Start Ks calculation"
 	local data_dir=$1
