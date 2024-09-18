@@ -26,18 +26,16 @@ gff1_file, gff1_motif = glob.glob(wkdir_path + "/" + sp1 + "*.gff")[0], dict_par
 gff2_file, gff2_motif = glob.glob(wkdir_path + "/" + sp2 + "*.gff")[0], dict_param['SP2_motif']
 Ks_min = float(dict_param['Ks_min']) if 'Ks_min' in dict_param else 0.01
 Ks_max = float(dict_param['Ks_max']) if 'Ks_max' in dict_param else 3
-repeat_limit = int(dict_param['limit']) if 'limit' in dict_param else 1
-print(f"PATH: {wkdir_path}\nRBH_file: {RBH_file}\nKs_file: {Ks_file}\ngff1_file: {gff1_file}\ngff2_file: {gff2_file}")
-print()
-# A tester: os.path.split(path)
+print(f"PATH: {wkdir_path}\nRBH_file: {RBH_file}\nKs_file: {Ks_file}\ngff1_file: {gff1_file}\ngff2_file: {gff2_file}\n")
 
 
 #######
 # gff #
 #######
 
-dico_sp, gene_db_count = {sp1: {}, sp2: {}}, {}
+dico_sp, gene_db_count = {}, {}
 for gff_file, motif, species in [(gff1_file, gff1_motif, sp1), (gff2_file, gff2_motif, sp2)]:
+    dico_sp[species] = {}
     print('gff_file =', gff_file)
     inputfile = open(gff_file)
     for line in inputfile:
@@ -59,8 +57,9 @@ for gff_file, motif, species in [(gff1_file, gff1_motif, sp1), (gff2_file, gff2_
         break
 print(f'len(dico_sp1): {len(dico_sp[sp1])}, len(dico_sp2): {len(dico_sp[sp2])}\ngene_db_count: {gene_db_count}')
 
-dict_gff = {sp1: {}, sp2: {}}
+dict_gff = {}
 for species in [sp1, sp2]:
+    dict_gff[species] = {}
     for chrom in sorted(dico_sp[species]):
         n = 0
         for position in sorted(dico_sp[species][chrom]):
@@ -71,6 +70,8 @@ for species in [sp1, sp2]:
                 for gene in dico_sp[species][chrom][position]:
                     if gene not in dict_gff[species]:
                         dict_gff[species][gene] = [chrom, n]
+    if intragenomic:
+        break
 print(f'len(dict_gff_sp1): {len(dict_gff[sp1])}, len(dict_gff_sp2): {len(dict_gff[sp2])}')
 
 
@@ -150,7 +151,7 @@ for dataset, count_list, stat, statut in [(dict_data1, sp2_count, 'stat_sp2', Tr
                 else:
                     count_list[len(dataset[chrom][species])] += 1
 
-            if len(dataset[chrom][species]) != repeat_limit:
+            if len(dataset[chrom][species]) != 1:
                 for species2 in sorted(dataset[chrom][species]):
                     if (dataset[chrom][species][species2][0], dataset[chrom][species][species2][1]) not in dict_pairwise:
                         dict_pairwise[(dataset[chrom][species][species2][0], dataset[chrom][species][species2][1])] = True
