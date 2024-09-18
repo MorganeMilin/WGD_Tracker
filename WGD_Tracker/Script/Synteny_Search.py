@@ -2,7 +2,7 @@
 Step 1 - Search for Syntenic blocks
 Searching for Syntenic Blocks
 Author: Morgane MILIN
-Last Update: August 2023
+Last Update: August 2024
 """
 
 ##################
