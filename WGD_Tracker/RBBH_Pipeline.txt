@@ -7,6 +7,7 @@
 source $1
 
 echo "Start of the RBBH Pipeline on: $data_dir"; date; pwd
+Nb_CPU=${Nb_CPU:-2}
 echo "Nb coeur = $Nb_CPU"
 if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
 TMP_name="TMP_${data_dir##*/}"
