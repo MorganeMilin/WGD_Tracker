@@ -9,7 +9,7 @@ echo "Start of the Synteny Search Pipeline on: $data_dir"; date; pwd
 
 if [ -d "${data_dir}/Synteny" ]; then :; else mkdir ${data_dir}/Synteny; fi
 
-python ${tool_dir}/Script/Synteny_Format.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif limit=1
+python ${tool_dir}/Script/Synteny_Format.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif
 python ${tool_dir}/Script/Synteny_Search.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif gap_limit=$gap gene_limit=$gene_nb
 
 echo -e "\nSynteny Search Done\n"
