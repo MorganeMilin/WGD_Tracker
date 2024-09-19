@@ -35,10 +35,10 @@ Please find the recommended dependencies version, which was used when developing
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
 
 #### To run the RBBH Pipeline:
-	bash --cpus-per-task=2 "{PATH}"/WGD_Tracker/RBBH_Pipeline.txt "{PATH}"/file.config
+	sbatch --cpus-per-task=2 "{PATH}"/WGD_Tracker/RBBH_Pipeline.txt "{PATH}"/file.config
 
 #### To run the Ks Pipeline:
- 	bash --cpus-per-task=2 "{PATH}"/WGD_Tracker/Ks_Pipeline.txt "{PATH}"/file.config
+ 	sbatch --cpus-per-task=2 "{PATH}"/WGD_Tracker/Ks_Pipeline.txt "{PATH}"/file.config
 
 #### To run the Synteny Pipeline:
   	bash "{PATH}"/WGD_Tracker/Synteny_Pipeline.txt "{PATH}"/file.config
