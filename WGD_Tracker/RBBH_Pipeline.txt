@@ -18,7 +18,7 @@ echo -e "\n Step 1 - Param Filtration "
 echo -e "\n############################\n"
 
 if [ -d "${data_dir}/RBBH" ]; then rm ${data_dir}/RBBH/*; else mkdir ${data_dir}/RBBH; fi
-ls -R ${data_dir}/*.blast | cat > $TMP_name
+ls -R "${data_dir}/*.blast" | cat > $TMP_name
 while IFS= read -r line; do
 	echo "python ${tool_dir}/Script/RBBH_Filtration.py blast_file=$line identity=$identity len_align=$len_align len_ratio=$len_ratio intragenomic=$intragenomic corr_intra="\"$corr_intra\""" >> ${data_dir}/launch_pFlt.sh ;
 done < $TMP_name
