@@ -1,9 +1,6 @@
 #! /bin/bash
 #SBATCH --job-name=WGD_Tracker-RBBH
 
-. /local/env/envparallel-20190122.sh
-. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-
 source $1
 
 echo "Start of the RBBH Pipeline on: $data_dir"; date; pwd
