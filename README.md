@@ -38,6 +38,7 @@ Se connecter à un noeud
 	srun –pty bash
  
 conda environment creation 
+
  	. /local/env/envconda3.sh
 	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml
 
