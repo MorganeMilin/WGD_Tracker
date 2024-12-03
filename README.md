@@ -31,6 +31,16 @@ However, WGD_Tracker does **require dependencies**:
 
 Please find the recommended dependencies version, which was used when developing the tool: Python v3.9, Parallel 20190122, Java v1.8.0, PAML v4.9, MACSE v2.05, R v4.1.0, Singularity v3.8.0
 
+### Dependency installation
+
+Se connecter à un noeud 
+	srun –pty bash
+conda environment creation 
+	. /local/env/envconda3.sh
+	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml
+Image sif for R dependencies 
+	Singularity build ./rmarkdown.sif ./wgd_tracker_R.def
+
 ### Usage
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
 
