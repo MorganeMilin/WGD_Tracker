@@ -3,6 +3,9 @@
 
 source $1
 
+$conda_source
+conda activate $conda_dp
+
 echo "Start of the RBBH Pipeline on: $data_dir"; date; pwd
 Nb_CPU=${Nb_CPU:-2}
 echo "Nb coeur = $Nb_CPU"
@@ -77,4 +80,4 @@ echo -e "\nStep 3 - RBBH Done\n"
 
 if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
 
-deactivate
+conda deactivate

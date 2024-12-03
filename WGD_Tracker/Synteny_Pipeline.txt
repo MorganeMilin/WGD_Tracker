@@ -1,9 +1,10 @@
 #! /bin/bash
 #SBATCH --job-name=WGD_Tracker-Synteny
 
-. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-
 source $1
+
+$conda_source
+conda activate $conda_dp
 
 echo "Start of the Synteny Search Pipeline on: $data_dir"; date; pwd
 
@@ -14,9 +15,9 @@ gene_nb=${gene_nb:-"5"}
 Ks_min=${Ks_min:-"0.01"}
 Ks_max=${Ks_max:-"3"}
 
-python ${tool_dir}/Script/Synteny_Format.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif Ks_min=$Ks_min Ks_max=$Ks_max
-python ${tool_dir}/Script/Synteny_Search.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif gap_limit=$gap gene_limit=$gene_nb
+python ${tool_dir}/Script/Synteny_Format.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif corr_SB=$corr_SB Ks_min=$Ks_min Ks_max=$Ks_max
+python ${tool_dir}/Script/Synteny_Search.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif corr_SB=$corr_SB gap_limit=$gap gene_limit=$gene_nb
 
 echo -e "\nSynteny Search Done\n"
 
-deactivate
+conda deactivate

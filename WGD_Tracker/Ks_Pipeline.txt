@@ -1,13 +1,10 @@
 #! /bin/bash
 #SBATCH --job-name=WGD_Tracker-Ks
 
-. /local/env/envjava-1.8.0.sh
-. /local/env/envpaml-4.9.sh
-. /local/env/envparallel-20190122.sh
-. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-macse_path="/home/genouest/cnrs_umr6553/mmilin/MACSE_V2_PIPELINES/UTILS/macse_v2.05.jar"
-
 source $1
+
+$conda_source
+conda activate $conda_dp
 
 echo "Start of the Ks Pipeline on: $data_dir"; date; pwd
 Nb_CPU=${Nb_CPU:-2}
@@ -36,7 +33,7 @@ mxt_breaks=${mxt_breaks:-"300"}
 ####################
 
 fasta_Extract() {
-	echo "Start fasta extraction"
+	echo -e "\nStart fasta extraction"
 	if [ -d "${data_dir}/Ks" ]; then :; else mkdir ${data_dir}/Ks; fi
 	if [ -d "${data_dir}/Ks/fasta" ]; then :; else mkdir ${data_dir}/Ks/fasta; fi
 	ls -R ${data_dir}/RBBH/RBBH*.txt | cat > $TMP_name
@@ -63,7 +60,7 @@ fasta_Extract() {
 				for x in `ls`; do
 					mv ${x} ../${TMP_folder}
 					if [[ $(ls -A ../$TMP_folder | wc -l) -ge $file_limit ]]; then
-						echo "$(ls -A ../$TMP_folder | wc -l) is greater or equal than ${file_limit}"
+						#echo "$(ls -A ../$TMP_folder | wc -l) is greater or equal than ${file_limit}"
 						break
 					fi
 				done
@@ -75,6 +72,7 @@ fasta_Extract() {
 		done
 	fi
 	rm -R ${folder}
+	cd ../..
 	rm $TMP_name
 }
 
@@ -84,19 +82,13 @@ fasta_Extract() {
 ##################
 
 Ks_calculation() {
-	. /local/env/envjava-1.8.0.sh
-	. /local/env/envpaml-4.9.sh
-	. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-	macse_path=${macse_path}
-
-	echo "Start Ks calculation"
+	echo -e "\nStart Ks calculation"
 	local data_dir=$1
 	local tool_dir=$2
 	local targeted_folder=$3
 	echo "data_dir = $data_dir"
 	echo "tool_dir = $tool_dir"
 	echo "targeted_folder= $targeted_folder"
-	
 	cd ${data_dir}/Ks/
 	
 	local fasta_folder=$(basename "$targeted_folder")
@@ -110,13 +102,12 @@ Ks_calculation() {
 	if [ -d "${data_dir}/Ks/${Ks_folder}" ]; then :; else mkdir ${data_dir}/Ks/${Ks_folder}; fi
 	ls -R ${data_dir}/Ks/${fasta_folder}/* | cat > ${data_dir}/Ks/$TMP_name
 	while IFS= read -r line; do
-		pwd
-		echo "line = $line"
+		#echo "line = $line"
 		line_corr="./${fasta_folder}/${line##*/}"
-		echo "line_corr = $line_corr"
+		#echo "line_corr = $line_corr"
 		folder_name=${line_corr%.fa*}
 		folder_name=${folder_name##*/}
-		echo "folder_name = $folder_name"
+		#echo "folder_name = $folder_name"
 		
 		###################
 		# Folder Creation #
@@ -135,28 +126,26 @@ Ks_calculation() {
 		file_name=${file_name##*/}
 		file_AA="${data_dir}/Ks/${Ks_folder}/${folder_name}/${file_name}_AA.fasta"
 		file_NT="${data_dir}/Ks/${Ks_folder}/${folder_name}/${file_name}_NT.fasta"
-		echo "$file_AA"
-		echo "$file_NT"
-		java -jar $macse_path -prog alignSequences -out_AA $file_AA -out_NT $file_NT -seq $line
+		#echo "$file_AA"
+		#echo "$file_NT"
+		macse -prog alignSequences -out_AA $file_AA -out_NT $file_NT -seq $line
 		
 		###################
 		# Codon alignment #
 		###################
 		python ${tool_dir}/Script/Codon_alignment.py NT_file=$file_NT AA_file=$file_AA
 		file_NT_codon="./Codon_alignment_NT.fasta"
-		echo "$file_NT_codon"
+		#echo "$file_NT_codon"
 		
-		###############################
-		# PAML - codeml - Preparation #
-		###############################
+		#################
+		# PAML - codeml #
+		#################
 		cp ${tool_dir}/control_file.txt ${data_dir}/Ks/${Ks_folder}/${folder_name}/
 		cd ${data_dir}/Ks/${Ks_folder}/${folder_name}/
 		sed -i "1i seqfile = ${file_NT_codon}" ./control_file.txt
 		sed -i "2i outfile = ./res.codeml.txt" ./control_file.txt
 		codeml ./control_file.txt
 		cd ../..
-		echo "Done"
-		echo ""
 	done < $TMP_name
 	
 	##########################
@@ -176,7 +165,7 @@ Ks_calculation() {
 ############################
 
 Ks_compilation() {
-	echo "Start Ks compilation"
+	echo -e "\nStart Ks compilation"
 	cd ${data_dir}/Ks/
 	cat ./Res_compil_NG_Ks_calculation_fasta_* > ./Res_compil_NG_Ks_total.txt
 	wc -l ./Res_compil_NG_Ks_total.txt
@@ -193,18 +182,17 @@ Ks_compilation() {
 
 
 Ks_distribution() {
-	echo "Start Ks distribution representation using the R package mixtools"
-	# . /local/env/envsingularity-3.8.5.sh 
-	cd ${data_dir}/Ks/
-	out_path=$PWD
-	echo "out path: ${out_path}"
-	mixtools_path=${tool_dir}
-	echo "mixtools path: ${mixtools_path}"
+	echo -e "\nStart Ks distribution representation using the R package mixtools"
+	$singularity_source 
+	out_path=${data_dir}/Ks
+	sif_path=${tool_dir}/${sif_dp}
+	mixtools_path=${tool_dir}/Script
 	Ks_dataset=${out_path}/Res_compil_NG_Ks_total.txt
-	echo "Ks_dataset = $Ks_dataset"
-	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib.Rmd', output_file='${out_path}/Ks_distribution_NG.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
-	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib_log_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_log_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
-	singularity exec --bind ${mixtools_path}/Script/ ${tool_dir}/rmarkdown2.sif Rscript -e "rmarkdown::render('${mixtools_path}/Script/Ks_distrib_sqrt_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_sqrt_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+	echo -e "\nout path: ${out_path}\sif path: ${sif_path}\nmixtools path: ${mixtools_path}\nKs_dataset = $Ks_dataset"	
+	
+	singularity exec --bind ${mixtools_path}/ ${sif_path} Rscript -e "rmarkdown::render('${mixtools_path}/Ks_distrib.Rmd', output_file='${out_path}/Ks_distribution_NG.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+	singularity exec --bind ${mixtools_path}/ ${sif_path} Rscript -e "rmarkdown::render('${mixtools_path}/Ks_distrib_log_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_log_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
+	singularity exec --bind ${mixtools_path}/ ${sif_path} Rscript -e "rmarkdown::render('${mixtools_path}/Ks_distrib_sqrt_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_sqrt_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
 }
 
 
@@ -213,11 +201,14 @@ Ks_distribution() {
 #############################################
 case $Ks_begin in
 	"fasta_Extract")
+		pwd
 		fasta_Extract
 		cd ${data_dir}/Ks/
+		pwd
 		export -f Ks_calculation
 		ls -d ./fasta_*/ | sed "s|^|Ks_calculation \"$data_dir\" \"$tool_dir\" \"|; s|/$|\"|" > TMP_fasta
 		parallel -a TMP_fasta -j $Nb_CPU
+		pwd
 		Ks_compilation
 		Ks_distribution
 		;;
@@ -239,4 +230,4 @@ case $Ks_begin in
 		;;
 esac
 
-deactivate
+conda deactivate

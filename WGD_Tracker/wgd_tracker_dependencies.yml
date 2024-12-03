@@ -1,0 +1,20 @@
+name: wgd_tracker_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  # Python 3.9
+  - python=3.9
+  - pip
+  # Java OpenJDK 8
+  - openjdk=8.0
+  # PAML
+  - paml=4.10.7
+  # MACSE
+  - macse=2.07
+  # GNU Parallel
+  - parallel
+  # Autres outils nécessaires
+  - curl
+  - cmake
