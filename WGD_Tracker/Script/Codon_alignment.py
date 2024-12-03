@@ -21,8 +21,8 @@ import Ks_functions as fct
 dict_param = {param.split('=')[0]: param.split('=')[1] for param in sys.argv[1:]}
 NT_path, NT_file = fct.split_path_and_file_name(dict_param['NT_file'])
 AA_path, AA_file = fct.split_path_and_file_name(dict_param['AA_file'])
-print('\nNT_path =', NT_path, '; NT_file =', NT_file)
-print('AA_path =', AA_path, '; AA_file =', AA_file)
+#print('\nNT_path =', NT_path, '; NT_file =', NT_file)
+#print('AA_path =', AA_path, '; AA_file =', AA_file)
 
 
 ################

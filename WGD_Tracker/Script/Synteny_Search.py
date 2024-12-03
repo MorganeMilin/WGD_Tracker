@@ -19,8 +19,9 @@ import Synteny_functions as fct
 ############################
 
 dict_param = {param.split('=')[0]: param.split('=')[1] for param in sys.argv[1:]}
-wkdir_path, sp1, sp2, intragenomic = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2'], eval(dict_param['Intragenomic'])
-data_file = glob.glob(wkdir_path + "/Synteny/dataset_*_v2.txt")[0]
+wkdir_path, sp1, sp2 = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2']
+intragenomic, corr_name = eval(dict_param['Intragenomic']), eval(dict_param['corr_SB'])
+data_file = glob.glob(wkdir_path + "/Synteny/dataset_*_v3.txt")[0]
 gff1_motif, gff2_motif, gap_limit, gene_limit = dict_param['SP1_motif'], dict_param['SP2_motif'], int(dict_param['gap_limit']), int(dict_param['gene_limit'])
 print(f"\ndata_file: {data_file}")
 
@@ -29,47 +30,7 @@ print(f"\ndata_file: {data_file}")
 # gff #
 #######
 
-dict_sp, dict_gff = {sp1: {}, sp2: {}}, {sp1: {}, sp2: {}}
-for species, motif in [(sp1, gff1_motif), (sp2, gff2_motif)]:
-    # On récupère le gff file
-    gff_file = glob.glob(wkdir_path + "/" + sp1 + "*.gff")[0]
-    print('gff_file =', gff_file)
-    # on complète dict_sp
-    inputfile = open(gff_file)
-    for line in inputfile:
-        if not line.startswith('#'):
-            line = line.replace('\n', '').split('\t')
-            if line[2] == motif:
-                chrom, gene, start, end = line[0], line[8].split('=')[1], int(line[3]), int(line[4])
-                if chrom not in dict_sp[species]:
-                    dict_sp[species][chrom] = {}
-                if (start, end) not in dict_sp[species][chrom]:
-                    dict_sp[species][chrom][(start, end)] = gene
-                else:
-                    if type(dict_sp[species][chrom][(start, end)]) is list:
-                        dict_sp[species][chrom][(start, end)].append(gene)
-                    else:
-                        dict_sp[species][chrom][(start, end)] = [dict_sp[species][chrom][(start, end)], gene]
-    inputfile.close()
-    # on complète dict_gff
-    for chrom in sorted(dict_sp[species]):
-        n = 0
-        for position in sorted(dict_sp[species][chrom]):
-            start, end = min(position[0], position[1]), max(position[0], position[1])
-            gene = dict_sp[species][chrom][position]
-            if type(gene) is list:
-                for gene_i in gene:
-                    if gene_i not in dict_gff[species]:
-                        n += 1
-                        dict_gff[species][gene_i] = [chrom, n, start, end]
-            else:
-                if gene not in dict_gff[species]:
-                    n += 1
-                    dict_gff[species][gene] = [chrom, n, start, end]
-    if intragenomic:
-        dict_sp[sp2] = dict_sp[sp1]
-        dict_gff[sp2] = dict_gff[sp1]
-        break
+dict_sp, dict_gff = fct.retrieve_gff_infos(wkdir_path=wkdir_path, SP=[sp1, sp2], Motif=[gff1_motif, gff2_motif], corr_name=corr_name, intragenomic=intragenomic)
 print(f'\nNumber of Chromosomes:\nSpecies 1: {len(dict_sp[sp1])}\nSpecies 2: {len(dict_sp[sp2])}')
 print(f'Number of genes:\nSpecies 1: {len(dict_gff[sp1])}\nSpecies 2: {len(dict_gff[sp2])}')
 
@@ -79,33 +40,24 @@ print(f'Number of genes:\nSpecies 1: {len(dict_gff[sp1])}\nSpecies 2: {len(dict_
 ###########
 
 # dict_data = {(sp1_chrom, sp2_chrom): {(sp1_rank, sp2_rank): [sp1_gene, sp2_gene, Ks]}}
-dict_data, line_count, keep_line, Ks_rm, gff_rm, db_rm = {}, 0, 0, 0, 0, 0
+dict_data, db_rm = {}, 0
 inputfile = open(data_file)
 for line in inputfile:
     line = line.replace('\n', '').split('\t')
-    line_count += 1
     if 0.01 <= float(line[3]) < 3:
         if line[0] in dict_gff[sp1] and line[1] in dict_gff[sp2]:
-            chrom_sp1, sp1_nb = dict_gff[sp1][line[0]][0], dict_gff[sp1][line[0]][1]
-            chrom_sp2, sp2_nb = dict_gff[sp2][line[1]][0], dict_gff[sp2][line[1]][1]
-            if (chrom_sp1, chrom_sp2) not in dict_data:
-                dict_data[(chrom_sp1, chrom_sp2)] = {}
-            if (sp1_nb, sp2_nb) not in dict_data[(chrom_sp1, chrom_sp2)]:
-                dict_data[(chrom_sp1, chrom_sp2)][(sp1_nb, sp2_nb)] = [line[0], line[1], float(line[3]), float(line[4])]
-                keep_line += 1
+            chrom1, nb1, chrom2, nb2 = dict_gff[sp1][line[0]][0], dict_gff[sp1][line[0]][1], dict_gff[sp2][line[1]][0], dict_gff[sp2][line[1]][1]
+            if (chrom1, chrom2) not in dict_data:
+                dict_data[(chrom1, chrom2)] = {}
+            if (nb1, nb2) not in dict_data[(chrom1, chrom2)]:
+                dict_data[(chrom1, chrom2)][(nb1, nb2)] = [line[0], line[1], float(line[3]), float(line[5])]
             else:
-                db_rm += 1
-                if float(line[4]) > dict_data[(chrom_sp1, chrom_sp2)][(sp1_nb, sp2_nb)][3]:
-                    dict_data[(chrom_sp1, chrom_sp2)][(sp1_nb, sp2_nb)] = [line[0], line[1], float(line[3]), float(line[4])]
+                raise ValueError("Error! That's not expected")
         else:
-            gff_rm += 1
+            raise ValueError("Error! That's not expected")
     else:
-        Ks_rm += 1
+        raise ValueError("Error! That's not expected")
 inputfile.close()
-print(f"On a total of {line_count} hits, {Ks_rm, gff_rm, db_rm} were removed: {Ks_rm} due to Ks values, "
-      f"{gff_rm} because one of the genes were not in the gff file(s) and "
-      f"{db_rm} because the hit was present several time within the data file.\n"
-      f"However, a total of {keep_line} hits were kept.")
 
 
 print('\n#####################################################')

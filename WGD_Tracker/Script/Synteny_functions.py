@@ -1,5 +1,47 @@
 from collections import Counter
 import copy
+import glob
+
+
+def retrieve_gff_infos(wkdir_path, SP, Motif, corr_name, intragenomic):
+    dico_sp, dico_gff = {SP[0]: {}, SP[1]: {}}, {SP[0]: {}, SP[1]: {}}
+    for species, motif in [(SP[0], Motif[0]), (SP[1], Motif[1])]:
+
+        gff_file = glob.glob(wkdir_path + "/" + species + "*.gff")[0]
+        print('gff_file =', gff_file)
+
+        # Complete dico_sp
+        inputfile = open(gff_file)
+        for line in inputfile:
+            if not line.startswith('#'):
+                line = line.replace('\n', '').split('\t')
+                if line[2] == motif:
+                    chrom, gene, start, end = line[0], line[8].split('=')[1], int(line[3]), int(line[4])
+                    gene_corr = corr_name[1].join(gene.split(corr_name[1])[:corr_name[2]]) if corr_name and corr_name[0] == species else corr_name[4].join(gene.split(corr_name[4])[:corr_name[5]]) if corr_name and corr_name[3] == species else gene
+                    if chrom not in dico_sp[species]:
+                        dico_sp[species][chrom] = {}
+                    if (start, end) not in dico_sp[species][chrom]:
+                        dico_sp[species][chrom][(start, end)] = [gene_corr]
+                    else:
+                        dico_sp[species][chrom][(start, end)].append(gene_corr)
+        inputfile.close()
+        print(f'len(dico_sp) for {species} = {len(dico_sp[species])}')
+
+        # Complete dico_gff
+        for chrom in sorted(dico_sp[species]):
+            n = 0
+            for position in sorted(dico_sp[species][chrom]):
+                start, end = min(position[0], position[1]), max(position[0], position[1])
+                n += 1
+                for gene in dico_sp[species][chrom][position]:
+                    if gene not in dico_gff[species]:
+                        dico_gff[species][gene] = [chrom, n, start, end]
+        print(f'len(dico_gff) for {species} = {len(dico_gff[species])}')
+
+        if intragenomic:
+            break
+
+    return dico_sp, dico_gff
 
 
 def prep_data(chrom, nb, infos, dico):

@@ -21,7 +21,7 @@ import Ks_functions as fct
 outfile = open(sys.argv[1], 'w')
 for param in sys.argv[2:]:
     data_path, data_file = fct.split_path_and_file_name(param)
-    print('data_path =', data_path, '; data_file =', data_file)
+    #print('data_path =', data_path, '; data_file =', data_file)
 
     ######
     # Ka #
