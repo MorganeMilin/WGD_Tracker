@@ -34,11 +34,15 @@ Please find the recommended dependencies version, which was used when developing
 ### Dependency installation
 
 Se connecter à un noeud 
+
 	srun –pty bash
+ 
 conda environment creation 
-	. /local/env/envconda3.sh
+ 	. /local/env/envconda3.sh
 	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml
+
 Image sif for R dependencies 
+
 	Singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
 ### Usage
