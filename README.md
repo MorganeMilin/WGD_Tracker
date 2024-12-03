@@ -44,7 +44,7 @@ conda environment creation
 
 Image sif for R dependencies 
 
-	Singularity build ./rmarkdown.sif ./wgd_tracker_R.def
+	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
 ### Usage
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
