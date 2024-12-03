@@ -35,7 +35,7 @@ Please find the recommended dependencies version, which was used when developing
 
 Se connecter à un noeud 
 
-	srun –pty bash
+	srun --pty bash
  
 conda environment creation 
 
