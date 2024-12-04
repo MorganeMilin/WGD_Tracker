@@ -19,8 +19,8 @@ import Synteny_functions as fct
 ############################
 
 dict_param = {param.split('=')[0]: param.split('=')[1] for param in sys.argv[1:]}
-wkdir_path, sp1, sp2 = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2']
-intragenomic, corr_name = eval(dict_param['Intragenomic']), eval(dict_param['corr_SB'])
+wkdir_path, sp1, sp2, intragenomic = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2'], eval(dict_param['Intragenomic'])
+corr_name = eval(dict_param['corr_SB']) if dict_param['corr_SB'] != '' else None
 data_file = glob.glob(wkdir_path + "/Synteny/dataset_*_v3.txt")[0]
 gff1_motif, gff2_motif, gap_limit, gene_limit = dict_param['SP1_motif'], dict_param['SP2_motif'], int(dict_param['gap_limit']), int(dict_param['gene_limit'])
 print(f"\ndata_file: {data_file}")

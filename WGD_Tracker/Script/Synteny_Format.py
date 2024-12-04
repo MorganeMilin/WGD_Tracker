@@ -20,8 +20,8 @@ import pprint
 ############################
 
 dict_param = {param.split('=')[0]: param.split('=')[1] for param in sys.argv[1:]}
-wkdir_path, sp1, sp2 = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2']
-intragenomic, corr_name = eval(dict_param['Intragenomic']), eval(dict_param['corr_SB'])
+wkdir_path, sp1, sp2, intragenomic = dict_param['dir_path'], dict_param['SP1'], dict_param['SP2'], eval(dict_param['Intragenomic'])
+corr_name = eval(dict_param['corr_SB']) if dict_param['corr_SB'] != '' else None
 RBH_file = glob.glob(wkdir_path + "/RBBH/" + "RBBH_*")[0]
 Ks_file = glob.glob(wkdir_path + "/Ks/Res_compil_NG_Ks_total.txt")[0]
 gff1_motif, gff2_motif = dict_param['SP1_motif'], dict_param['SP2_motif']
