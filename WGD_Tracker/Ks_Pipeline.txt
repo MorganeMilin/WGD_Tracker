@@ -188,7 +188,7 @@ Ks_distribution() {
 	sif_path=${tool_dir}/${sif_dp}
 	mixtools_path=${tool_dir}/Script
 	Ks_dataset=${out_path}/Res_compil_NG_Ks_total.txt
-	echo -e "\nout path: ${out_path}\sif path: ${sif_path}\nmixtools path: ${mixtools_path}\nKs_dataset = $Ks_dataset"	
+	echo -e "\nout path: ${out_path}\nsif path: ${sif_path}\nmixtools path: ${mixtools_path}\nKs_dataset = $Ks_dataset"	
 	
 	singularity exec --bind ${mixtools_path}/ ${sif_path} Rscript -e "rmarkdown::render('${mixtools_path}/Ks_distrib.Rmd', output_file='${out_path}/Ks_distribution_NG.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
 	singularity exec --bind ${mixtools_path}/ ${sif_path} Rscript -e "rmarkdown::render('${mixtools_path}/Ks_distrib_log_trfm.Rmd', output_file='${out_path}/Ks_distribution_NG_log_transformed.pdf')" data_file=$Ks_dataset ksmin=$mxt_ksmin ksmax=$mxt_ksmax kmin=$mxt_kmin kmax=$mxt_kmax boots=$mxt_boots epsilon=$mxt_epsilon breaks=$mxt_breaks 
@@ -221,6 +221,7 @@ case $Ks_begin in
 		Ks_distribution
 		;;
 	"Ks_distribution")
+		pwd
 		Ks_distribution
 		;;
 	*)
