@@ -12,11 +12,12 @@ Date: 2024-12-04
 ### Introduction
 WGD_Tracker is a tool designed to ease (intra- and inter-)genomic comparisons for detecting whole genome duplication events and to provide dating estimations by Ks analyses. This tool is fully customizable, allowing users to select stringent or flexible parameters depending on their specific analytical objectives.
 
-This tool includes four pipelines:
+This tool includes five pipelines:
 * The RBBH Pipeline identifies homologous gene pairs via reciprocal BLAST best hit (RBBH) analysis from a BLAST output file. Because polyploid genomes can contain multiple copies of the same genes, this pipeline can also search for reciprocal blast best hits (RBH) and not just the best hits in order to highlight all putative duplicated gene copies.
 * The Ks Pipeline allows the calculation of synonymous substitution rates between gene pairs.
 * The Synteny Pipeline accurately identifies synteny blocks even when they are fragmented.
 * The Dotplot Pipeline generates graphical plots from the outputs of the three previous Pipelines (RBBH; Ks; or Synteny).
+* The Karyotype Pipeline generates graphical representation of the syntenic blocks on the chromosomes.
 
 ### Installation 
 WGD_Tracker does not require any installation, a simple git clone is enough:
