@@ -20,9 +20,7 @@ This tool includes five pipelines:
 * The Karyotype Pipeline generates graphical representation of the two analyzed genomes karyotypes, illustrating the detected synteny blocks for each chromosome across both genomes.
 
 ### Installation 
-WGD_Tracker does not require any installation, a simple git clone is enough:
-
-	git clone https://github.com/MorganeMilin/WGD_Tracker.git 
+WGD_Tracker does not require any installation; a simple git clone is enough. However, WGD_Tracker does require dependencies: Python3, Java, PAML, MACSE, R, Singularity and Parallel. However, if you only want to use some of the tool's pipelines, not all dependencies are necessary for them to work properly. The following table shows the dependencies required for each pipeline:
 
 However, WGD_Tracker does **require dependencies**:
 - RBBH Pipeline: Python and Parallel
@@ -32,26 +30,19 @@ However, WGD_Tracker does **require dependencies**:
 
 Please find the recommended dependencies version, which was used when developing the tool: Python v3.9, Parallel 20190122, Java v1.8.0, PAML v4.9, MACSE v2.05, R v4.1.0, Singularity v3.8.0
 
-### Dependency installation
-Create a working directory (ex: your_wd) containing the WGD_Tracker directory (with all scripts) + your data folder (with data files with the same file id but the following different extensions .gff; .fasta; .cds; .masked; .blast)
+Retrieve WGD_Tracker
 
-	cd your_wd/
+	git clone https://github.com/MorganeMilin/WGD_Tracker.git 
 
-Connect to a cluster node: 
+Conda environment creation: (Please note that you must have access to conda)
 
-	srun --pty bash
- 
-conda environment creation: 
+	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml$ cd ./WGD_Tracker
 
- 	. /local/env/envconda3.sh
-	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml
- 	exit
 
-Image sif for R dependencies within the WGD_Tracker directory:
+Image sif for R dependencies: (Please note that you must have access to singularity and the generatedd .sif image must be located in the WGD_Tracker folder)
 
-	srun --pty bash
- 	cd WGD_Tracker/
- 	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
+	cd WGD_Tracker 
+	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
 ### Usage
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
