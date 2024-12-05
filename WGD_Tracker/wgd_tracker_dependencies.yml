@@ -7,6 +7,8 @@ dependencies:
   # Python 3.9
   - python=3.9
   - pip
+  - pip:
+      - svg_turtle
   # Java OpenJDK 8
   - openjdk=8.0
   # PAML

@@ -1,0 +1,19 @@
+#! /bin/bash
+#SBATCH --job-name=WGD_Tracker-Karyotype_visualisation
+
+source $1
+
+$conda_source
+conda activate $conda_dp
+
+echo "Start of the Kartyotype graphic representation on: $data_dir"; date; pwd
+
+if [ -d "${data_dir}/Karyotype" ]; then :; else mkdir ${data_dir}/Karyotype; fi
+
+out=${out:-"Karyotype"}
+
+python ${tool_dir}/Script/Karyotype_SB_representation.py dir_path=$data_dir SP1=$SP1 SP2=$SP2 Intragenomic=$intragenomic SP1_motif=$sp1_motif SP2_motif=$sp2_motif name_corr="\"$karyotype_name_corr\"" corr_SB="\"$corr_SB\"" control_file=$karyotype_control_file corr_size=$corr_size outname=$out
+
+echo -e "\nKaryotype graphic representation Done\n"
+
+conda deactivate
