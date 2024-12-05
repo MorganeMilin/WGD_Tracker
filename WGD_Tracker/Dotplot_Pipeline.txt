@@ -1,9 +1,10 @@
 #! /bin/bash
 #SBATCH --job-name=WGD_Tracker-Dotplot
 
-. /home/genouest/cnrs_umr6553/mmilin/mmilin_env_python/bin/activate
-
 source $1
+
+$conda_source
+conda activate $conda_dp
 
 echo "Start of the Dotplot representation Pipeline on: $data_dir"; date; pwd
 
@@ -12,4 +13,4 @@ python ${tool_dir}/Script/Dotplot_formatting.py dir_path=$data_dir SP1=$SP1 SP2=
 python ${tool_dir}/Script/Dotplot_generator.py dir_path=$data_dir control_file=$control_file outname=$out
 echo -e "\nDot plot Done\n"
 
-deactivate
+conda deactivate
