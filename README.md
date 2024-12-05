@@ -17,7 +17,7 @@ This tool includes five pipelines:
 * The Ks Pipeline allows the calculation of synonymous substitution rates between gene pairs.
 * The Synteny Pipeline accurately identifies synteny blocks even when they are fragmented.
 * The Dotplot Pipeline generates graphical plots from the outputs of the three previous Pipelines (RBBH; Ks; or Synteny).
-* The Karyotype Pipeline generates graphical representation of the syntenic blocks on the chromosomes.
+* The Karyotype Pipeline generates graphical representation of the two analyzed genomes karyotypes, illustrating the detected synteny blocks for each chromosome across both genomes.
 
 ### Installation 
 WGD_Tracker does not require any installation, a simple git clone is enough:
