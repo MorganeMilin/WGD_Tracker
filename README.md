@@ -10,14 +10,14 @@ Date: 2024-12-04
 - [Citation](#citation)
 
 ### Introduction
-WGD_Tracker is a tool designed to ease (intra- and inter-)genomic comparisons for detecting whole genome duplication events and to provide dating estimations by Ks analyses. This tool is fully customizable, allowing users to select stringent or flexible parameters depending on their specific analytical objectives.
+WGD_Tracker is a tool designed to ease (intra- and inter-) genomic comparisons for detecting whole genome duplication events and to provide WGD dating by Ks analyses. This tool is fully customizable, allowing users to select stringent or flexible parameters, detailed in this document, depending on their specific goals.
 
 This tool includes five pipelines:
-* The RBBH Pipeline identifies homologous gene pairs via reciprocal BLAST best hit (RBBH) analysis from a BLAST output file. Because polyploid genomes can contain multiple copies of the same genes, this pipeline can also search for reciprocal blast best hits (RBH) and not just the best hits in order to highlight all putative duplicated gene copies.
-* The Ks Pipeline allows the calculation of synonymous substitution rates between gene pairs.
-* The Synteny Pipeline accurately identifies synteny blocks even when they are fragmented.
+* The RBBH Pipeline identifies homologous gene pairs via reciprocal BLAST best hit (RBBH) analysis from a BLAST output file. Because polyploid genomes contain multiple copies of the same genes, this pipeline can also search for reciprocal blast best hits (RBH) and not just the best hits in order to highlight all putative duplicated gene copies.
+* The Ks Pipeline allows the calculation of synonymous substitution rates (Nei & Gojobori model) between gene pairs.
+* The Synteny Pipeline accurately identifies syntenic blocks even when dispersed.
 * The Dotplot Pipeline generates graphical plots from the outputs of the three previous Pipelines (RBBH; Ks; or Synteny).
-* The Karyotype Pipeline generates graphical representation of the two analyzed genomes karyotypes, illustrating the detected synteny blocks for each chromosome across both genomes.
+* Karyotype Pipeline generates a graphical representation of conserved syntenic blocks between two genomes as karyotypes, for each chromosome across both genomes.
 
 ### Installation 
 WGD_Tracker does not require any installation; a simple git clone is enough. However, WGD_Tracker does require dependencies: Python3, Java, PAML, MACSE, R, Singularity and Parallel. However, if you only want to use some of the tool's pipelines, not all dependencies are necessary for them to work properly. The following table shows the dependencies required for each pipeline:
@@ -36,12 +36,12 @@ Retrieve WGD_Tracker
 
 Conda environment creation: (Please note that you must have access to conda)
 
-	conda env create -p ./dependencies_conda_env -f wgd_tracker_dependencies.yml$ cd ./WGD_Tracker
+	conda env create -p ./dependencies_conda_env -f ./WGD_Tracker/wgd_tracker_dependencies.yml
 
 
 Image sif for R dependencies: (Please note that you must have access to singularity and the generatedd .sif image must be located in the WGD_Tracker folder)
 
-	cd WGD_Tracker 
+	cd WGD_Tracker/ 
 	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
 ### Usage
@@ -58,6 +58,9 @@ Please consult the Manual.pdf for instructions on how to format your working dir
 
 #### To run the Dotplot Pipeline:
    	sbatch  "{PATH}"/WGD_Tracker/Dotplot_Pipeline.txt "{PATH}"/file.config
+    
+#### To run the Karyotype Pipeline:
+   	sbatch  "{PATH}"/WGD_Tracker/Karyotype_Pipeline.txt "{PATH}"/file.config
 
 ### Citations
 
