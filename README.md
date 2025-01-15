@@ -7,7 +7,6 @@ Date: 2024-12-04
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Citation](#citation)
 
 ### Introduction
 WGD_Tracker is a tool designed to ease (intra- and inter-) genomic comparisons for detecting whole genome duplication events and to provide WGD dating by Ks analyses. This tool is fully customizable, allowing users to select stringent or flexible parameters, detailed in this document, depending on their specific goals.
@@ -61,6 +60,3 @@ Please consult the Manual.pdf for instructions on how to format your working dir
     
 #### To run the Karyotype Pipeline:
    	sbatch  "{PATH}"/WGD_Tracker/Karyotype_Pipeline.txt "{PATH}"/file.config
-
-### Citations
-
