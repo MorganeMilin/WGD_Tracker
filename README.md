@@ -1,4 +1,4 @@
-![DOI: 10.5281/zenodo.14672011](https://github.com/user-attachments/assets/ff30de49-f4fc-4117-8e21-25c9550636ea)
+[![DOI](https://zenodo.org/badge/855434198.svg)](https://doi.org/10.5281/zenodo.14672010) 
 
 # WGD_Tracker
 Created by: Morgane MILIN
