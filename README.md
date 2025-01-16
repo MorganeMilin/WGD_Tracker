@@ -33,14 +33,10 @@ Retrieve WGD_Tracker
 
 	git clone https://github.com/MorganeMilin/WGD_Tracker.git 
 
-Conda environment creation: (Please note that you must have access to conda)
+Dependencies installation (Please note that you must have access to conda and singularity. The generated .sif image must be located in the WGD_Tracker folder)
 
-	conda env create -p ./dependencies_conda_env -f ./WGD_Tracker/wgd_tracker_dependencies.yml
-
-
-Image sif for R dependencies: (Please note that you must have access to singularity and the generatedd .sif image must be located in the WGD_Tracker folder)
-
-	cd WGD_Tracker/ 
+	cd WGD_Tracker/
+ 	conda env create -p ./dependencies_conda_env -f ./wgd_tracker_dependencies.yml
 	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
 ### Usage
