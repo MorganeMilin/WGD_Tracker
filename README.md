@@ -1,7 +1,8 @@
 [![DOI](https://zenodo.org/badge/855434198.svg)](https://doi.org/10.5281/zenodo.14672010) 
 
 # WGD_Tracker
-Created by: Morgane MILIN
+Created by: MILIN Morgane
+Contributors: BURBAN Ewen, AINOUCHE Malika and SALMON Armel
 
 Date: 2024-12-04
 
