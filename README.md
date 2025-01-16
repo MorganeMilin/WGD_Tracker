@@ -1,5 +1,7 @@
 ![DOI: 10.5281/zenodo.14672011](https://github.com/user-attachments/assets/ff30de49-f4fc-4117-8e21-25c9550636ea)
 
+https://zenodo.org/badge/DOI/10.5281/zenodo.14672011.svg
+
 # WGD_Tracker
 Created by: Morgane MILIN
 
