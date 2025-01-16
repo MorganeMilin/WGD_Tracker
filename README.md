@@ -2,6 +2,7 @@
 
 # WGD_Tracker
 Created by: MILIN Morgane
+
 Contributors: BURBAN Ewen, AINOUCHE Malika and SALMON Armel
 
 Date: 2024-12-04
