@@ -40,7 +40,7 @@ Retrieve WGD_Tracker
 
 Dependencies installation (Please note that you must have access to conda and singularity. The generated .sif image must be located in the WGD_Tracker folder)
 
-	cd WGD_Tracker/
+	cd WGD_Tracker/WGD_Tracker/
  	conda env create -p ./dependencies_conda_env -f ./wgd_tracker_dependencies.yml
 	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
 
