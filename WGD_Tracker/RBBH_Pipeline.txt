@@ -12,6 +12,8 @@ echo "Nb coeur = $Nb_CPU"
 if ls ${data_dir}/launch* > /dev/null 2>&1; then rm ${data_dir}/launch*; fi
 TMP_name="TMP_${data_dir##*/}"
 
+coding=${coding:-False}
+TErm=${TErm:-False}
 
 echo -e "\n############################" 
 echo -e "\n Step 1 - Param Filtration " 
