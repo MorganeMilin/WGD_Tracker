@@ -5,7 +5,7 @@ Last Update: July 2024
 Input: Filtered BLAST output text file
 
 This script aims to keep a predefined number of best alignments for each query sequences
-and for each predefined kb window.
+and/or for each predefined kb window.
 """
 
 ##################
