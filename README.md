@@ -38,11 +38,16 @@ Retrieve WGD_Tracker
 
 	git clone https://github.com/MorganeMilin/WGD_Tracker.git 
 
-Dependencies installation (Please note that you must have access to conda and singularity. The generated .sif image must be located in the WGD_Tracker folder)
+Dependencies installation (Please note that you must have access to conda)
 
 	cd WGD_Tracker/WGD_Tracker/
  	conda env create -p ./dependencies_conda_env -f ./wgd_tracker_dependencies.yml
-	singularity build ./rmarkdown.sif ./wgd_tracker_R.def
+	conda activate dependencies_conda_env
+ 	R
+  	install.packages("tinytex")
+   	tinytex::install_tinytex()
+    	q()
+     	conda deactivate
 
 ### Usage
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
