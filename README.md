@@ -46,8 +46,8 @@ Dependencies installation (Please note that you must have access to conda)
  	R
   	install.packages("tinytex")
    	tinytex::install_tinytex()
-    	q()
-     	conda deactivate
+ 	q()
+   	conda deactivate
 
 ### Usage
 Please consult the Manual.pdf for instructions on how to format your working directory folder and input files. The document also contains all the information you need to create the configuration file required to run WGD_Tracker. Additionally, it provides further clarification on the various output files.
