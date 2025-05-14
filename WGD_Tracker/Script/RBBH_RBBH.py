@@ -135,10 +135,9 @@ for l_b1 in input_file_BH1:
                         outfile_rbbh.write('\t'.join(res) + '\n')
                         kept_line += 1
 
-                # si cds vs genomique
+                # cds vs genomique (to be completed)
                 else:
                     pass
-                    # A revoir !!!
 
 input_file_BH1.close()
 outfile_rbbh.close()
