@@ -1,17 +1,3 @@
-def split_path_and_file_name(inputfile):
-    donnee_path, donnee_file = '', ''
-    if '/' in inputfile:
-        for i in range(len(inputfile[::-1])):
-            if inputfile[::-1][i] == '/':
-                donnee_path, donnee_file = inputfile[::-1][i:][::-1], inputfile[::-1][:i][::-1]
-                break
-    elif inputfile == 'None':
-        donnee_path, donnee_file = None, None
-    else:
-        donnee_path, donnee_file = './', inputfile
-    return donnee_path, donnee_file
-
-
 def buff_fas_reader(file):
     current_seq, current_name = [], None
     file_iter = open(file)
@@ -185,13 +171,13 @@ def read_through_predefined_windows(input_data, pos_min, pos_max, start, end):
         # Si blast alignment completement dans l'intervalle
         if pos_min <= int(ligne[start]) < int(ligne[end]) <= pos_max:
             tmp_res.append(ligne)
-        # Si chevauchant, alors on doit avoir au moins 50% dans cet intervalle (va limiter les doublons)
+        # If overlapping, then expect at least 50% within this interval (will limit duplicates)
         elif pos_min <= int(ligne[start]) < pos_max < int(ligne[end]) <= pos_max:
-            # Si au moins 50% est inclu dans l'intervalle
+            # If at least 50% is included in the interval
             if (pos_max - int(ligne[start]) + 1) / (int(ligne[end]) - int(ligne[start]) + 1) * 100 >= 50:
                 tmp_res.append(ligne)
         elif int(ligne[start]) < pos_min < int(ligne[end]) <= pos_max:
-            # Si au moins 50% est inclu dans l'intervalle
+            # If at least 50% is included in the interval
             if (int(ligne[end]) - pos_min + 1) / (int(ligne[end]) - int(ligne[start]) + 1) * 100 >= 50:
                 tmp_res.append(ligne)
     tmp_res_sorted = sorted(tmp_res, key=lambda bit_score: float(bit_score[11]), reverse=True)
@@ -210,7 +196,7 @@ def best_hits_search(res, query_col, subject_col, start, end, limit):
             nb = 1
             tempo_ligne.extend([str(nb)])
             res_out_bh.append(tempo_ligne)
-            tempo_ligne = tempo_ligne[:-1]  ##
+            tempo_ligne = tempo_ligne[:-1] 
             continue
 
         elif ligne[query_col] == tmp_q and ligne[subject_col] not in tmp_s and nb < int(limit):
@@ -219,7 +205,7 @@ def best_hits_search(res, query_col, subject_col, start, end, limit):
             nb += 1
             tempo_ligne.extend([str(nb)])
             res_out_bh.append(tempo_ligne)
-            tempo_ligne = tempo_ligne[:-1]  ##
+            tempo_ligne = tempo_ligne[:-1] 
             continue
 
         elif ligne[query_col] == tmp_q and ligne[subject_col] in tmp_s and nb < int(limit):
@@ -233,7 +219,7 @@ def best_hits_search(res, query_col, subject_col, start, end, limit):
                     nb += 1
                     tempo_ligne.extend([str(nb)])
                     res_out_bh.append(tempo_ligne)
-                    tempo_ligne = tempo_ligne[:-1]  ##
+                    tempo_ligne = tempo_ligne[:-1]
                     break
             continue
 
